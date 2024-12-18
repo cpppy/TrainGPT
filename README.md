@@ -52,10 +52,10 @@ cd finetune
 deepspeed finetune_qwen.py  
 ```
 
-#### Finetune on a single node with 2*RTX4090      
+#### Finetune on a single node with 2 * RTX4090      
 <img src="./assets/finetune_on_2x4090_screenshot.png" width="400">  
 
-#### Finetune on 2 nodes(2*RTX4090 and 2*A100), extremely slow because a 72B-awq deployed on each A100 device.   
+#### Finetune on 2 nodes(2 * RTX4090 and 2 * A100), extremely slow because a 72B-awq deployed on each A100 device.   
 <img src="./assets/finetune_on_2_nodes_screenshot.png" width="400">  
 
 #### Custom Develop
