@@ -16,7 +16,9 @@ While, single node with multi GPUs or multi nodes with multi GPUs is also suppor
 ```python
 cd dataset & vim generate_lmdb.py   
 ```
-the dataset: medical was downloaded from huggingface: shibing624/medical
+the dataset: medical was downloaded from huggingface: shibing624/medical.    
+if you want to use your own datasets, just modify the script: dataset/generate_lmdb.py    
+
 ```python
     dataset = MedicalMix(data=dict(
         data_paths=[
