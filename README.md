@@ -1,5 +1,5 @@
 # TrainGPT
-Finetune Qwen with DeepSpeed
+Instruct Finetune on Qwen2.5-0.5B with DeepSpeed
 
 With max_seq_len=128 and qwen2.5-0.5B-instruct as base model, you can run the code on a single RTX3060 GPU device.  
 While, single node with multi GPUs or multi nodes with multi GPUs is also supported by this code.   
@@ -7,8 +7,9 @@ While, single node with multi GPUs or multi nodes with multi GPUs is also suppor
 
 ### TODO List
 1. More Dataset and More Base Models(especially for small LLM)  
-2. DPO  
-3. PPO  
+2. Pretrain
+3. DPO  
+4. PPO  
 
 
 ### Training Steps
