@@ -5,14 +5,14 @@ With max_seq_len=128 and qwen2.5-0.5B-instruct as base model, you can run the co
 While, single node with multi GPUs or multi nodes with multi GPUs is also supported by this code.   
 
 
-### TODO List
+## TODO List
 1. More Dataset and More Base Models(especially for small LLM)  
 2. Pretrain
 3. DPO  
 4. PPO  
 
 
-### Training Steps
+## Training Steps
 #### step1. Prepare Dataset(lmdb cache for boosting)
 ```python
 cd dataset & vim generate_lmdb.py   
@@ -58,7 +58,7 @@ deepspeed finetune_qwen.py
 #### Finetune on 2 nodes(2 * RTX4090 and 2 * A100), extremely slow because a 72B-awq deployed on each A100 device.   
 <img src="./assets/finetune_on_2_nodes_screenshot.png" width="400">  
 
-#### Custom Develop
+## Custom Develop
 
 #### Package: dschat   
 the package dschat was copied from microsoft/DeepSpeedExamples with nothing modified.   
@@ -68,7 +68,7 @@ the position is "DeepSpeedExamplesapplications/DeepSpeed-Chat/dschat"
 
 
 
-### Reference   
+## Reference   
 https://github.com/microsoft/DeepSpeedExamples
 
 
