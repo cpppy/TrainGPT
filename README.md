@@ -58,6 +58,13 @@ deepspeed finetune_qwen.py
 #### Finetune on 2 nodes(2 * RTX4090 and 2 * A100), extremely slow because a 72B-awq deployed on each A100 device.   
 <img src="./assets/finetune_on_2_nodes_screenshot.png" width="400">  
 
+#### Visualize Metrics on Tensorboard
+```python
+deepspeed finetune_qwen_tb.py
+```
+
+<img src="./assets/finetune_tensorboard.png" width="600"> 
+
 ## Custom Develop
 
 #### Package: dschat   
