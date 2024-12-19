@@ -12,6 +12,7 @@ import math
 import torch
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
+from torch.utils.tensorboard import SummaryWriter
 
 from transformers import (
     AutoModelForCausalLM,
@@ -194,16 +195,16 @@ def parse_args():
                              'If specified, loss is calculated in fp32.')
     ## Tensorboard logging
     parser.add_argument('--enable_tensorboard',
-                        action='store_true',
-                        # type=bool,
-                        # default=True,
+                        # action='store_true',
+                        type=bool,
+                        default=True,
                         help='Enable tensorboard logging')
     parser.add_argument('--tensorboard_name',
                         type=str,
                         default="qwen2_deepspeed_finetune")
     parser.add_argument('--tensorboard_path',
                         type=str,
-                        default="/mnt2/output/dsp_model_output2_tensorboard")
+                        default="/mnt2/output/dsp_model_output3_tensorboard")
     ## Tokenizer
     parser.add_argument("--add_eot_token",
                         action='store_true',
@@ -230,6 +231,15 @@ def main():
 
     print(f'args: {args}')
 
+    writer = None
+    if args.enable_tensorboard:
+        print(
+            f"Tensorboard logs going to: {args.tensorboard_path}/{args.tensorboard_name}"
+        )
+        writer = SummaryWriter(
+            f"{args.tensorboard_path}/{args.tensorboard_name}")
+
+
     if args.local_rank == -1:
         device = torch.device(get_accelerator().device_name())
     else:
@@ -244,9 +254,9 @@ def main():
     ds_config = get_train_ds_config(offload=args.offload,
                                     dtype=args.dtype,
                                     stage=args.zero_stage,
-                                    enable_tensorboard=args.enable_tensorboard,
-                                    tb_path=args.tensorboard_path,
-                                    tb_name=args.tensorboard_name,
+                                    # enable_tensorboard=args.enable_tensorboard,
+                                    # tb_path=args.tensorboard_path,
+                                    # tb_name=args.tensorboard_name,
                                     )
     ds_config[
         'train_micro_batch_size_per_gpu'] = args.per_device_train_batch_size
@@ -507,6 +517,14 @@ def main():
         args.global_rank)
     perplexity, eval_loss = evaluation(model, eval_dataloader)
     print_rank_0(f"ppl: {perplexity}, loss: {eval_loss}", args.global_rank)
+    if args.enable_tensorboard and torch.distributed.get_rank() in [-1, 0]:
+        writer.add_scalar(f'1_Eval/perplexity',
+                          perplexity,
+                          global_step=0)
+        writer.add_scalar(f'1_Eval/loss',
+                          eval_loss,
+                          global_step=0)
+
 
     from utils.metrics import AverageMetric
     m_loss = AverageMetric()
@@ -523,13 +541,6 @@ def main():
             batch = to_device(batch, device)
             outputs = model(**batch, use_cache=False)
             loss = outputs.loss
-            m_loss.update(loss.item(), batch['input_ids'].shape[0])
-            if args.print_loss and step % 100 == 0:
-                _lr = lr_scheduler.get_last_lr()
-                print(
-                    f"Epoch: {epoch}, Step: {step}, Rank: {torch.distributed.get_rank()}, lr = {round(_lr[0], 6)}, loss = {m_loss.avg}"
-                )
-                m_loss.reset()
             model.backward(loss)
             model.step()
             end = time.time()
@@ -545,6 +556,8 @@ def main():
                     f"Rank: {torch.distributed.get_rank()}, tokens/sec={round(_throughput, 4)}, samples/sec={round(_num_samples, 4)}"
                 )
 
+            # add metrics to tensorboard
+            global_step = epoch * len(train_dataloader) + step
             if step > 0 and step % 1000 == 0:
                 # Evaluate perplexity on the validation set.
                 print_rank_0(
@@ -553,6 +566,32 @@ def main():
                 perplexity, eval_loss = evaluation(model, eval_dataloader)
                 print_rank_0(f"ppl: {perplexity}, loss: {eval_loss}", args.global_rank)
                 model.tput_timer.update_epoch_count()
+
+                if args.enable_tensorboard and torch.distributed.get_rank() in [-1, 0]:
+                    writer.add_scalar(f'1_Eval/perplexity',
+                                      perplexity,
+                                      global_step=global_step)
+                    writer.add_scalar(f'1_Eval/loss',
+                                      eval_loss,
+                                      global_step=global_step)
+
+            m_loss.update(loss.item(), batch['input_ids'].shape[0])
+            if args.print_loss and step % 100 == 0:
+                _lr = lr_scheduler.get_last_lr()
+                print(
+                    f"Epoch: {epoch}, Step: {step}, Rank: {torch.distributed.get_rank()}, lr = {round(_lr[0], 6)}, loss = {m_loss.avg}"
+                )
+                if args.enable_tensorboard:
+                    if torch.distributed.get_rank() in [-1, 0]:
+                        writer.add_scalar(f'0_Train/lr',
+                                          _lr[0],
+                                          global_step=global_step)
+                    writer.add_scalar(f'0_Train/rank-{torch.distributed.get_rank()}_loss',
+                                      m_loss.avg,
+                                      global_step=global_step)
+                    writer.flush()
+                m_loss.reset()
+
 
         # save model each epoch
         if args.output_dir is not None:
