@@ -23,7 +23,7 @@ if you want to use your own datasets, just modify the script: dataset/alpaca_cle
 ```python
     dataset = AlpacaDataset(data=dict(
         data_paths=[
-            '../data/alpaca_data_cleaned.json',
+            '../data/alpaca_data_cleaned.json',  # path to raw data
         ]),
         tokenizer_path="/data/Qwen/Qwen2.5-0.5B-Instruct",
         proc_func=qwen2_preprocess,
@@ -33,7 +33,7 @@ if you want to use your own datasets, just modify the script: dataset/alpaca_cle
     sample = dataset.__getitem__(0)
     print(sample)
 
-    dataset.write2lmdb(lmdb_path='/data/data/llm_datasets/cache/alpaca_cleaned_instruct_qwen2.5_tokenized_20241221.lmdb',
+    dataset.write2lmdb(lmdb_path='/data/data/llm_datasets/cache/alpaca_cleaned_instruct_qwen2.5_tokenized_20241221.lmdb',  # cache path for tokenized data
                        key_tag='alpaca_cleaned')
 ```
 
