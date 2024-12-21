@@ -80,6 +80,11 @@ class MedicalMix(Dataset):
 
 if __name__=='__main__':
 
+    '''
+    Download data from huggingface: shibing624/medical
+    
+    '''
+
     dataset = MedicalMix(data=dict(
         data_paths=[
             '/data/data/llm_datasets/medical/finetune/train_zh_0.json',

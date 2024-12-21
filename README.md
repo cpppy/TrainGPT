@@ -17,14 +17,13 @@ While, single node with multi GPUs or multi nodes with multi GPUs is also suppor
 ```python
 cd dataset & vim generate_lmdb.py   
 ```
-the dataset: medical was downloaded from huggingface: shibing624/medical.    
-if you want to use your own datasets, just modify the script: dataset/generate_lmdb.py    
+the dataset: alpaca was downloaded from huggingface: yahma/alpaca-cleaned    
+if you want to use your own datasets, just modify the script: dataset/alpaca_cleaned.py    
 
 ```python
-    dataset = MedicalMix(data=dict(
+    dataset = AlpacaDataset(data=dict(
         data_paths=[
-            '/data/data/llm_datasets/medical/finetune/train_zh_0.json',
-            '/data/data/llm_datasets/medical/finetune/train_en_1.json',
+            '../data/alpaca_data_cleaned.json',
         ]),
         tokenizer_path="/data/Qwen/Qwen2.5-0.5B-Instruct",
         proc_func=qwen2_preprocess,
@@ -34,8 +33,8 @@ if you want to use your own datasets, just modify the script: dataset/generate_l
     sample = dataset.__getitem__(0)
     print(sample)
 
-    dataset.write2lmdb(lmdb_path='/data/data/llm_datasets/cache/medical_mix_finetune_train_qwen2.5_tokenized_20241216.lmdb',
-                       key_tag='train_zh_and_en')
+    dataset.write2lmdb(lmdb_path='/data/data/llm_datasets/cache/alpaca_cleaned_instruct_qwen2.5_tokenized_20241221.lmdb',
+                       key_tag='alpaca_cleaned')
 ```
 
 #### step2. Finetune Model with Instruct Dataset
